@@ -2,794 +2,1226 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f766e" />
   <title>FreshTrack</title>
-
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json" />
-
-  <!-- iOS PWA Meta Tags -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="FreshTrack" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
-
-  <!-- Theme color (browser chrome on Android) -->
-  <meta name="theme-color" content="#2c7cf6" />
-
   <style>
     :root {
-      --bg: #f3f6fb;
-      --card: #ffffff;
-      --text: #142033;
-      --muted: #61708a;
-      --line: #d9e1ee;
-      --primary: #2c7cf6;
-      --primary-2: #1f5fc0;
-      --danger: #e04f5f;
-      --warn: #f1a93b;
-      --ok: #29a56c;
-      --shadow: 0 12px 30px rgba(16, 31, 60, 0.12);
-      --radius: 22px;
-      /* Safe area insets for notch/home-bar on iPhone */
+      --bg: #f3f6f5;
+      --bg-2: #eef3f1;
+      --surface: #ffffff;
+      --surface-solid: #ffffff;
+      --text: #10211d;
+      --muted: #63746f;
+      --line: rgba(16, 33, 29, 0.10);
+      --line-strong: rgba(16, 33, 29, 0.16);
+      --primary: #0f766e;
+      --primary-strong: #0b5d57;
+      --accent: #14b8a6;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --ok: #15803d;
+      --shadow: 0 20px 50px rgba(15, 23, 42, 0.16);
+      --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.08);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: #e8efec;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+    .device {
+      width: min(100%, 430px);
+      min-height: calc(100vh - 40px);
+      max-height: calc(100vh - 40px);
+      background: #0f172a;
+      border-radius: 38px;
+      padding: 10px;
+      box-shadow: 0 30px 80px rgba(2, 6, 23, 0.28);
+      position: relative;
       overflow: hidden;
     }
 
-    body {
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
+    .notch {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 138px;
+      height: 30px;
+      background: #020617;
+      border-radius: 999px;
+      z-index: 5;
     }
 
-    /* ── Full-screen app shell ── */
-    .app {
+    .screen {
+      height: 100%;
+      background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      border-radius: 30px;
+      overflow: hidden;
+      position: relative;
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      height: 100dvh; /* dynamic viewport height: accounts for browser bar on iOS */
-      max-width: 480px;
-      margin: 0 auto;
-      background: var(--bg);
-      position: relative;
+      isolation: isolate;
     }
 
-    /* ── App bar ── */
-    .appbar {
-      padding-top: calc(var(--safe-top) + 16px);
-      padding-bottom: 16px;
-      padding-left: 20px;
-      padding-right: 20px;
-      background: linear-gradient(135deg, #2c7cf6 0%, #45a2ff 100%);
-      color: #fff;
-      flex-shrink: 0;
+    header {
+      padding: calc(22px + var(--safe-top)) 20px 14px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--line-strong);
     }
 
-    .topline {
+    .status {
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 12px;
-      opacity: 0.95;
-      margin-bottom: 14px;
+      color: var(--muted);
+      margin-bottom: 12px;
     }
 
-    .brand {
+    .brand-row {
       display: flex;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
       align-items: center;
     }
 
     .brand h1 {
-      font-size: 24px;
       margin: 0;
-      line-height: 1.1;
+      font-size: 28px;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
     }
 
     .brand p {
       margin: 6px 0 0;
-      font-size: 13px;
-      opacity: 0.95;
+      font-size: 14px;
+      color: var(--muted);
     }
 
-    .avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.18);
+    .profile-chip {
+      min-width: 48px;
+      height: 48px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #0f766e, #0b5d57);
+      color: white;
       display: grid;
       place-items: center;
-      font-weight: 700;
-      font-size: 15px;
-      border: 1px solid rgba(255,255,255,0.24);
-      flex-shrink: 0;
+      font-weight: 800;
+      box-shadow: var(--shadow-soft);
     }
 
-    /* ── Stats row ── */
+    main {
+      flex: 1;
+      overflow: auto;
+      padding: 16px 16px 112px;
+      scroll-behavior: smooth;
+      background: transparent;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+    .view > .grid,
+    .view > .list,
+    .view > .search-wrap,
+    .view > .pill-row {
+      width: 100%;
+    }
+
+    .grid { display: grid; gap: 14px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+      padding: 16px;
+    }
+
+    .hero {
+      padding: 18px;
+      background: linear-gradient(135deg, rgba(15,118,110,1), rgba(20,184,166,0.92));
+      color: white;
+      box-shadow: 0 10px 24px rgba(15, 118, 110, 0.18);
+      border: 0;
+    }
+
+    .hero h2, .hero p { margin: 0; }
+    .hero p { margin-top: 6px; color: rgba(255,255,255,0.9); }
+
     .stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-top: -24px;
-      position: relative;
-      z-index: 2;
-      padding: 0 16px;
-      flex-shrink: 0;
+      margin-top: 14px;
     }
 
     .stat {
-      background: rgba(255,255,255,0.97);
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.22);
       border-radius: 18px;
-      padding: 14px 12px;
-      box-shadow: var(--shadow);
+      padding: 12px;
     }
 
-    .stat .label {
+    .stat small {
+      display: block;
       font-size: 11px;
-      color: var(--muted);
-      margin-bottom: 6px;
+      color: rgba(255,255,255,0.84);
+      margin-bottom: 4px;
     }
 
-    .stat .value {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
+    .stat strong {
+      font-size: 24px;
+      letter-spacing: -0.05em;
     }
 
-    /* ── Scrollable content ── */
-    .content {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 14px 16px calc(var(--safe-bottom) + 90px);
-    }
-
-    /* ── Bottom nav ── */
-    .bottom-nav {
-      position: absolute;
-      left: 12px;
-      right: 12px;
-      bottom: calc(var(--safe-bottom) + 10px);
-      background: rgba(255,255,255,0.96);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 22px;
-      padding: 10px;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      box-shadow: 0 10px 30px rgba(18, 32, 64, 0.14);
-      border: 1px solid rgba(218, 226, 242, 0.9);
-      z-index: 100;
-    }
-
-    .tab-btn {
-      background: transparent;
-      border: 0;
-      border-radius: 16px;
-      padding: 10px 8px;
+    .section-head {
       display: flex;
-      flex-direction: column;
-      gap: 5px;
       align-items: center;
-      justify-content: center;
-      font: inherit;
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 700;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .tab-btn.active {
-      background: #eef4ff;
-      color: var(--primary-2);
-    }
-
-    .tab-btn .emoji { font-size: 18px; }
-
-    /* ── Panels ── */
-    .panel { display: none; animation: fade 0.18s ease; }
-    .panel.active { display: block; }
-
-    @keyframes fade {
-      from { opacity: 0.3; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── Cards / shared components ── */
-    .grid { display: grid; gap: 14px; }
-
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow);
-    }
-
-    .section-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .section-title h2 {
-      margin: 0;
-      font-size: 17px;
-    }
-
-    .section-title button,
-    .ghost-btn,
-    .action-btn,
-    .chip,
-    .primary-btn,
-    .secondary-btn {
-      border: 0;
-      cursor: pointer;
-      font: inherit;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .ghost-btn {
-      background: #eef4ff;
-      color: var(--primary-2);
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .item {
-      display: flex;
       justify-content: space-between;
       gap: 12px;
-      padding: 12px 0;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
       border-bottom: 1px solid var(--line);
     }
 
-    .item:last-child { border-bottom: 0; padding-bottom: 0; }
-    .item:first-child { padding-top: 0; }
-
-    .item-main {
-      display: flex;
-      gap: 12px;
-      min-width: 0;
-      flex: 1;
+    .section-head h3, .section-head h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.03em;
     }
 
-    .icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      background: #eef4ff;
-      display: grid;
-      place-items: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-
-    .name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
-
-    .meta { font-size: 12px; color: var(--muted); line-height: 1.35; }
-
-    .status {
-      align-self: center;
-      white-space: nowrap;
-      font-size: 11px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      font-weight: 800;
-    }
-
-    .danger { background: #ffe3e7; color: #ae243b; }
-    .warn   { background: #fff1d8; color: #9c6500; }
-    .ok     { background: #dff6ea; color: #18794a; }
-
-    .actions {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .action-btn {
-      background: #f5f8ff;
-      border-radius: 18px;
-      padding: 14px 10px;
-      text-align: center;
-      color: var(--text);
-      box-shadow: inset 0 0 0 1px #e4ecfa;
-    }
-
-    .action-btn span { display: block; font-size: 22px; margin-bottom: 6px; }
-    .action-btn strong { display: block; font-size: 12px; line-height: 1.3; }
-
-    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-
-    .chip {
-      background: #eef4ff;
-      color: var(--primary-2);
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .chip.active { background: var(--primary); color: #fff; }
-
-    .shopping-row { display: flex; gap: 8px; margin-bottom: 12px; }
-
-    input, select {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: #fff;
-      border-radius: 14px;
-      padding: 12px 13px;
-      font: inherit;
-      color: var(--text);
-      font-size: 16px; /* prevents iOS auto-zoom on focus */
-    }
-
-    .primary-btn {
-      background: var(--primary);
-      color: #fff;
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-weight: 700;
-      width: 100%;
-    }
-
-    .secondary-btn {
-      background: #eef4ff;
-      color: var(--primary-2);
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-weight: 700;
-      width: 100%;
-    }
-
-    .hint { font-size: 13px; color: var(--muted); margin-top: 10px; }
-    .empty { color: var(--muted); font-size: 13px; padding: 4px 0; }
-    .tiny { font-size: 11px; color: var(--muted); margin-top: 4px; }
-
-    .inline {
-      display: grid;
-      grid-template-columns: 1fr 110px;
-      gap: 10px;
-    }
-
-    /* ── Install banner ── */
-    #install-banner {
-      display: none;
-      position: fixed;
-      bottom: calc(var(--safe-bottom) + 90px);
-      left: 12px;
-      right: 12px;
-      background: #142033;
-      color: white;
-      border-radius: 18px;
-      padding: 14px 16px;
+    .section-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
       font-size: 13px;
-      z-index: 200;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-      display: flex;
-      align-items: center;
-      gap: 12px;
     }
 
-    #install-banner.hidden { display: none !important; }
+    .btn, button, input, select, textarea { font: inherit; }
 
-    #install-banner .install-text { flex: 1; line-height: 1.4; }
-    #install-banner button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 8px 14px;
-      font: inherit;
-      font-size: 13px;
-      font-weight: 700;
+    .btn {
+      border: 0;
+      border-radius: 16px;
+      padding: 12px 14px;
       cursor: pointer;
+      font-weight: 700;
+      transition: transform .16s ease, opacity .16s ease, background .16s ease;
+    }
+
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-strong); }
+    .btn-secondary { background: rgba(15,118,110,0.08); color: var(--primary-strong); }
+    .btn-soft { background: #f2f6f5; color: var(--text); }
+    .btn-danger { background: rgba(220,38,38,0.1); color: var(--danger); }
+    .btn.full { width: 100%; }
+    .btn-row { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); }
+
+    .pill-row {
+      display: flex;
+      gap: 8px;
+      overflow: auto;
+      padding: 2px 0 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .pill {
       white-space: nowrap;
+      background: rgba(15,118,110,0.08);
+      color: var(--primary-strong);
+      border: 1px solid rgba(15,118,110,0.12);
+      border-radius: 999px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
     }
 
-    #install-dismiss {
-      background: transparent !important;
-      padding: 4px 8px !important;
-      color: rgba(255,255,255,0.5) !important;
-      font-size: 18px !important;
+    .pill.active {
+      background: var(--primary);
+      color: white;
+      border-color: transparent;
     }
 
-    /* Desktop: show centered, max width */
-    @media (min-width: 481px) {
-      body {
-        background: linear-gradient(180deg, #edf3ff 0%, #f9fbff 100%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    .list { display: grid; gap: 10px; }
+
+    .item-card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      box-shadow: none;
+    }
+
+    .item-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .item-name {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .item-meta, .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .badge {
+      font-size: 12px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .badge.ok { color: var(--ok); background: rgba(21,128,61,0.1); }
+    .badge.warn { color: var(--warning); background: rgba(217,119,6,0.12); }
+    .badge.danger { color: var(--danger); background: rgba(220,38,38,0.1); }
+    .badge.info { color: var(--primary-strong); background: rgba(15,118,110,0.1); }
+
+    .search-wrap {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: 0 0 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .field, .search {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: 14px;
+      background: #ffffff;
+      padding: 13px 14px;
+      color: var(--text);
+      outline: none;
+    }
+
+    .field:focus, .search:focus, textarea:focus, select:focus {
+      border-color: rgba(15,118,110,0.35);
+      box-shadow: 0 0 0 4px rgba(20,184,166,0.1);
+    }
+
+    textarea.field { min-height: 88px; resize: vertical; }
+
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .subtle {
+      background: #f4faf9;
+      border: 1px solid rgba(15,118,110,0.10);
+      border-radius: 16px;
+      padding: 12px;
+      color: var(--primary-strong);
+      font-size: 13px;
+    }
+
+    .bottom-nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 8px 12px calc(8px + var(--safe-bottom));
+      background: #ffffff;
+      border-top: 1px solid var(--line-strong);
+      z-index: 8;
+    }
+
+    .nav-shell {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 6px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      box-shadow: none;
+    }
+
+    .nav-btn {
+      border: 0;
+      background: transparent;
+      border-radius: 16px;
+      padding: 10px 6px;
+      color: var(--muted);
+      display: grid;
+      gap: 4px;
+      justify-items: center;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .nav-btn.active {
+      color: var(--primary-strong);
+      background: rgba(15,118,110,0.08);
+      border-color: rgba(15,118,110,0.14);
+      font-weight: 700;
+    }
+
+    .nav-icon { font-size: 19px; }
+    .nav-label { font-size: 12px; }
+
+    .floating-add {
+      position: absolute;
+      right: 18px;
+      bottom: 92px;
+      z-index: 9;
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      border: 0;
+      background: linear-gradient(180deg, var(--primary), var(--primary-strong));
+      color: white;
+      font-size: 28px;
+      box-shadow: 0 10px 24px rgba(15, 118, 110, 0.25);
+      cursor: pointer;
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 0; }
+      .device {
+        width: 100%;
         min-height: 100vh;
-        padding: 24px;
+        max-height: 100vh;
+        border-radius: 0;
+        padding: 0;
       }
-      .app {
-        height: min(820px, 90vh);
-        border-radius: 34px;
-        box-shadow: 0 24px 60px rgba(0,0,0,0.22);
-        overflow: hidden;
-      }
-      .bottom-nav {
-        border-radius: 18px;
-      }
+      .screen, .notch { border-radius: 0; }
+      .notch { display: none; }
+      .floating-add { right: 18px; bottom: 92px; }
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2,6,23,0.46);
+      display: none;
+      align-items: end;
+      justify-content: center;
+      z-index: 30;
+      padding: 14px;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      width: min(100%, 430px);
+      border: 1px solid var(--line);
+      max-height: 92vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: 0 30px 70px rgba(2,6,23,0.34);
+    }
+
+    .modal video, .modal canvas {
+      width: 100%;
+      border-radius: 18px;
+      background: #0f172a;
+      min-height: 220px;
+      object-fit: cover;
+    }
+
+    .modal h3 { margin: 0 0 6px; font-size: 22px; }
+    .modal p { margin: 0 0 14px; color: var(--muted); }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .camera-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 108px;
+      background: rgba(16,33,29,0.92);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 999px;
+      box-shadow: var(--shadow-soft);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .22s ease, transform .22s ease;
+      z-index: 50;
+      max-width: min(90vw, 420px);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+    .empty {
+      text-align: center;
+      padding: 26px 16px;
+      color: var(--muted);
+      background: #ffffff;
+      border: 1px dashed var(--line-strong);
+      border-radius: 18px;
+    }
+
+    .small { font-size: 12px; }
+    .right { text-align: right; }
+    .hidden { display: none !important; }
+    .preview-img {
+      width: 86px;
+      height: 86px;
+      object-fit: cover;
+      border-radius: 18px;
+      border: 1px solid rgba(16,33,29,0.08);
     }
   </style>
 </head>
 <body>
-
-<div class="app">
-  <div class="appbar">
-    <div class="topline">
-      <span id="clock">09:41</span>
-      <span>🔒 FreshTrack</span>
-    </div>
-    <div class="brand">
-      <div>
-        <h1>FreshTrack</h1>
-        <p>Mehr Übersicht. Weniger Food Waste.</p>
-      </div>
-      <div class="avatar">FT</div>
-    </div>
-  </div>
-
-  <div class="stats" id="stats"></div>
-
-  <div class="content">
-    <div style="height:14px"></div>
-    <section id="panel-home" class="panel active"></section>
-    <section id="panel-inventory" class="panel"></section>
-    <section id="panel-add" class="panel"></section>
-    <section id="panel-shopping" class="panel"></section>
-  </div>
-
-  <nav class="bottom-nav">
-    <button class="tab-btn active" data-tab="home"><span class="emoji">🏠</span><span>Start</span></button>
-    <button class="tab-btn" data-tab="inventory"><span class="emoji">🥦</span><span>Bestand</span></button>
-    <button class="tab-btn" data-tab="add"><span class="emoji">➕</span><span>Erfassen</span></button>
-    <button class="tab-btn" data-tab="shopping"><span class="emoji">🛒</span><span>Einkauf</span></button>
-  </nav>
-</div>
-
-<!-- Android install prompt banner -->
-<div id="install-banner" class="hidden">
-  <div class="install-text">📲 <strong>FreshTrack</strong> als App installieren</div>
-  <button id="install-btn">Installieren</button>
-  <button id="install-dismiss">✕</button>
-</div>
-
-<script>
-  // ── Data & Storage ───────────────────────────────────────────
-  const defaultItems = [
-    { id: 1, name: 'Milch',    category: 'Kühlschrank', qty: '1 Packung', expiresIn: 2, icon: '🥛' },
-    { id: 2, name: 'Joghurt',  category: 'Kühlschrank', qty: '4 Becher',  expiresIn: 1, icon: '🥣' },
-    { id: 3, name: 'Tomaten',  category: 'Gemüse',      qty: '6 Stück',   expiresIn: 4, icon: '🍅' },
-    { id: 4, name: 'Käse',     category: 'Kühlschrank', qty: '200 g',     expiresIn: 6, icon: '🧀' },
-    { id: 5, name: 'Hähnchen', category: 'Kühlschrank', qty: '400 g',     expiresIn: 0, icon: '🍗' },
-    { id: 6, name: 'Äpfel',    category: 'Obst',        qty: '5 Stück',   expiresIn: 8, icon: '🍎' }
-  ];
-
-  const defaultShopping = [
-    { id: 101, text: 'Eier',         done: false },
-    { id: 102, text: 'Vollkornbrot', done: false },
-    { id: 103, text: 'Paprika',      done: true  }
-  ];
-
-  const store = {
-    getItems()      { return JSON.parse(localStorage.getItem('freshtrack_items')    || 'null') || structuredClone(defaultItems);   },
-    saveItems(v)    { localStorage.setItem('freshtrack_items',    JSON.stringify(v)); },
-    getShopping()   { return JSON.parse(localStorage.getItem('freshtrack_shopping') || 'null') || structuredClone(defaultShopping); },
-    saveShopping(v) { localStorage.setItem('freshtrack_shopping', JSON.stringify(v)); }
-  };
-
-  let items    = store.getItems();
-  let shopping = store.getShopping();
-  let filter   = 'all';
-
-  const panels = {
-    home:      document.getElementById('panel-home'),
-    inventory: document.getElementById('panel-inventory'),
-    add:       document.getElementById('panel-add'),
-    shopping:  document.getElementById('panel-shopping')
-  };
-
-  // ── Helpers ──────────────────────────────────────────────────
-  function expiryStatus(days) {
-    if (days <= 1) return { label: days < 1 ? 'Heute' : '1 Tag', cls: 'danger' };
-    if (days <= 4) return { label: days + ' Tage', cls: 'warn' };
-    return { label: days + ' Tage', cls: 'ok' };
-  }
-
-  function guessIcon(name) {
-    const n = name.toLowerCase();
-    if (n.includes('milch'))                  return '🥛';
-    if (n.includes('käse'))                   return '🧀';
-    if (n.includes('joghurt'))                return '🥣';
-    if (n.includes('tomate'))                 return '🍅';
-    if (n.includes('apfel'))                  return '🍎';
-    if (n.includes('banane'))                 return '🍌';
-    if (n.includes('huhn') || n.includes('hähn')) return '🍗';
-    if (n.includes('ei'))                     return '🥚';
-    if (n.includes('brot'))                   return '🍞';
-    return '🥬';
-  }
-
-  function itemHtml(item) {
-    const status = expiryStatus(item.expiresIn);
-    return `
-      <div class="item">
-        <div class="item-main">
-          <div class="icon">${item.icon}</div>
-          <div>
-            <div class="name">${item.name}</div>
-            <div class="meta">${item.qty} · ${item.category}<br>Ablauf in ${item.expiresIn === 0 ? 'weniger als 1 Tag' : item.expiresIn + ' Tagen'}</div>
+  <div class="device">
+    <div class="notch"></div>
+    <div class="screen">
+      <header>
+        <div class="status">
+          <span id="statusTime">09:41</span>
+          <span>FreshTrack Live</span>
+        </div>
+        <div class="brand-row">
+          <div class="brand">
+            <h1>FreshTrack</h1>
+            <p>Lebensmittel im Blick. Weniger Abfall. Weniger Doppelkauf.</p>
           </div>
+          <div class="profile-chip">FT</div>
         </div>
-        <div class="status ${status.cls}">${status.label}</div>
-      </div>`;
-  }
+      </header>
 
-  // ── Render functions ─────────────────────────────────────────
-  function renderStats() {
-    const critical = items.filter(i => i.expiresIn <= 1).length;
-    const soon     = items.filter(i => i.expiresIn <= 4).length;
-    document.getElementById('stats').innerHTML = [
-      { label: 'Produkte',      value: items.length },
-      { label: 'Bald kritisch', value: soon         },
-      { label: 'Heute/morgen',  value: critical     }
-    ].map(s => `<div class="stat"><div class="label">${s.label}</div><div class="value">${s.value}</div></div>`).join('');
-  }
-
-  function renderHome() {
-    const urgent      = [...items].sort((a,b) => a.expiresIn - b.expiresIn).slice(0, 4);
-    const suggestions = items.filter(i => i.expiresIn <= 2).map(i => i.name);
-    panels.home.innerHTML = `
-      <div class="grid">
-        <div class="card">
-          <div class="section-title"><h2>Heute wichtig</h2><button class="ghost-btn" onclick="switchTab('inventory')">Alles ansehen</button></div>
-          ${urgent.map(itemHtml).join('')}
-        </div>
-        <div class="card">
-          <div class="section-title"><h2>Schnellaktionen</h2></div>
-          <div class="actions">
-            <button class="action-btn" onclick="switchTab('add')"><span>➕</span><strong>Manuell erfassen</strong></button>
-            <button class="action-btn" onclick="simulateCapture('scan')"><span>📷</span><strong>Barcode-Scan</strong></button>
-            <button class="action-btn" onclick="simulateCapture('photo')"><span>🤖</span><strong>Foto-Erkennung</strong></button>
-          </div>
-          <div class="hint">Scan und Foto sind als Prototyp simuliert.</div>
-        </div>
-        <div class="card">
-          <div class="section-title"><h2>Verbrauchsempfehlung</h2></div>
-          <p style="margin:0 0 8px; font-size:14px; line-height:1.5; color:#40506a;">Zuerst verbrauchen: <strong>${suggestions.length ? suggestions.join(', ') : 'aktuell keine'}</strong>.</p>
-        </div>
-      </div>`;
-  }
-
-  function renderInventory() {
-    const filtered = items.filter(item => {
-      if (filter === 'critical') return item.expiresIn <= 1;
-      if (filter === 'soon')     return item.expiresIn <= 4;
-      return true;
-    }).sort((a,b) => a.expiresIn - b.expiresIn);
-
-    panels.inventory.innerHTML = `
-      <div class="grid">
-        <div class="card">
-          <div class="section-title"><h2>Bestand</h2><button class="ghost-btn" onclick="resetDemo()">Demo zurücksetzen</button></div>
-          <div class="chips">
-            <button class="chip ${filter === 'all'      ? 'active' : ''}" onclick="setFilter('all')">Alle</button>
-            <button class="chip ${filter === 'soon'     ? 'active' : ''}" onclick="setFilter('soon')">Bald ablaufend</button>
-            <button class="chip ${filter === 'critical' ? 'active' : ''}" onclick="setFilter('critical')">Kritisch</button>
-          </div>
-          ${filtered.length ? filtered.map(itemHtml).join('') : '<div class="empty">Keine Produkte in diesem Filter.</div>'}
-        </div>
-      </div>`;
-  }
-
-  function renderAdd() {
-    panels.add.innerHTML = `
-      <div class="grid">
-        <div class="card">
-          <div class="section-title"><h2>Lebensmittel erfassen</h2></div>
+      <main>
+        <section class="view active" id="view-home">
           <div class="grid">
-            <div class="inline">
-              <input id="newName"  placeholder="Produktname" />
-              <input id="newQty"   placeholder="Menge" />
+            <div class="card hero">
+              <h2>Dein Haushalt ist aktuell gut organisiert.</h2>
+              <p id="homeSummary">2 Produkte sollten bald verbraucht werden.</p>
+              <div class="stats">
+                <div class="stat"><small>Im Bestand</small><strong id="statInventory">0</strong></div>
+                <div class="stat"><small>Bald fällig</small><strong id="statSoon">0</strong></div>
+                <div class="stat"><small>Einkäufe</small><strong id="statShopping">0</strong></div>
+              </div>
             </div>
-            <div class="inline">
-              <select id="newCategory">
-                <option>Kühlschrank</option><option>Gemüse</option><option>Obst</option>
-                <option>Tiefkühlung</option><option>Vorrat</option>
-              </select>
-              <input id="newExpiry" type="number" min="0" max="365" placeholder="Tage" />
-            </div>
-            <button class="primary-btn"   onclick="addItem()">Produkt speichern</button>
-            <button class="secondary-btn" onclick="simulateCapture('scan')">Barcode-Scan simulieren</button>
-            <button class="secondary-btn" onclick="simulateCapture('photo')">Foto-Erkennung simulieren</button>
-          </div>
-          <div class="hint">Je weniger Aufwand, desto höher die Nutzungsrate.</div>
-        </div>
-        <div class="card">
-          <div class="section-title"><h2>Doppelkauf-Prüfung</h2></div>
-          <input id="checkDuplicate" placeholder="z. B. Milch eingeben" oninput="checkDuplicate()" />
-          <div id="duplicateResult" class="hint">Die App prüft, ob ein Produkt bereits vorhanden ist.</div>
-        </div>
-      </div>`;
-  }
 
-  function renderShopping() {
-    panels.shopping.innerHTML = `
-      <div class="grid">
-        <div class="card">
-          <div class="section-title"><h2>Einkaufsliste</h2></div>
-          <div class="shopping-row">
-            <input id="shoppingInput" placeholder="Produkt hinzufügen" />
-            <button class="primary-btn" style="width:auto;white-space:nowrap" onclick="addShopping()">Hinzu</button>
-          </div>
-          <div>
-            ${shopping.length ? shopping.map(entry => `
-              <div class="item">
-                <div class="item-main">
-                  <div class="icon">${entry.done ? '✅' : '🛒'}</div>
-                  <div>
-                    <div class="name" style="text-decoration:${entry.done ? 'line-through' : 'none'}">${entry.text}</div>
-                    <div class="meta">${entry.done ? 'Bereits erledigt' : 'Offen'}</div>
-                  </div>
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h3>Schnellzugriff</h3>
+                  <p>Wähle die passende Erfassungsart.</p>
                 </div>
-                <button class="ghost-btn" onclick="toggleShopping(${entry.id})">${entry.done ? 'Offen' : 'Erledigt'}</button>
-              </div>`).join('') : '<div class="empty">Noch keine Einträge vorhanden.</div>'}
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary" data-open="add">+ Produkt</button>
+                <button class="btn btn-secondary" data-open="scanner">QR / Barcode</button>
+                <button class="btn btn-soft" data-open="camera">Kamera</button>
+                <button class="btn btn-soft" data-view="shopping">Einkäufe</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h3>Als Nächstes verbrauchen</h3>
+                  <p>Automatisch nach Ablaufdatum sortiert.</p>
+                </div>
+              </div>
+              <div class="list" id="soonList"></div>
+            </div>
           </div>
+        </section>
+
+        <section class="view" id="view-inventory">
+          <div class="search-wrap">
+            <input id="inventorySearch" class="search" type="search" placeholder="Bestand durchsuchen" />
+          </div>
+          <div class="pill-row" id="inventoryFilters"></div>
+          <div class="list" id="inventoryList"></div>
+        </section>
+
+        <section class="view" id="view-shopping">
+          <div class="grid">
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h2>Einkaufsliste</h2>
+                  <p>Doppelteinkäufe werden direkt hier geprüft.</p>
+                </div>
+              </div>
+              <div class="split">
+                <input id="shoppingName" class="field" placeholder="z. B. Milch" />
+                <button class="btn btn-primary" id="addShoppingBtn">Zur Liste</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h3>Bestandsabgleich</h3>
+                  <p>Erkennt Artikel, die bereits im Bestand sind.</p>
+                </div>
+              </div>
+              <div id="duplicateInsights"></div>
+            </div>
+
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h3>Liste</h3>
+                  <p>Offene und erledigte Einkäufe.</p>
+                </div>
+              </div>
+              <div class="list" id="shoppingList"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-capture">
+          <div class="grid">
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h2>Erfassung</h2>
+                  <p>Füge Lebensmittel auf dem schnellsten Weg hinzu.</p>
+                </div>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary" data-open="add">Manuell</button>
+                <button class="btn btn-secondary" data-open="scanner">QR / Barcode scannen</button>
+                <button class="btn btn-soft" data-open="camera">Kamera öffnen</button>
+                <button class="btn btn-soft" id="installDemoData">Demo-Daten laden</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h3>So funktioniert es</h3>
+                </div>
+              </div>
+              <div class="subtle">
+                QR-/Barcode-Scan nutzt die echte Gerätekamera. Kameraaufnahme speichert ein echtes Bild am Produkt. Produktnamen, Mengen und Ablaufdaten können danach direkt ergänzt oder korrigiert werden.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h3>Letzte Erfassungen</h3>
+                </div>
+              </div>
+              <div class="list" id="recentList"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <div class="bottom-nav">
+        <div class="nav-shell">
+          <button class="nav-btn active" data-view="home"><div class="nav-icon">⌂</div><div class="nav-label">Home</div></button>
+          <button class="nav-btn" data-view="inventory"><div class="nav-icon">▤</div><div class="nav-label">Bestand</div></button>
+          <button class="nav-btn" data-view="shopping"><div class="nav-icon">🛒</div><div class="nav-label">Einkauf</div></button>
+          <button class="nav-btn" data-view="capture"><div class="nav-icon">◉</div><div class="nav-label">Erfassen</div></button>
         </div>
-      </div>`;
-  }
+      </div>
+    </div>
+  </div>
 
-  function renderAll() {
-    renderStats();
-    renderHome();
-    renderInventory();
-    renderAdd();
-    renderShopping();
-  }
+  <button class="floating-add" data-open="add" aria-label="Produkt hinzufügen">+</button>
 
-  // ── Actions ──────────────────────────────────────────────────
-  function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + tab).classList.add('active');
-    // Scroll content back to top on tab switch
-    document.querySelector('.content').scrollTop = 0;
-  }
+  <div class="modal-backdrop" id="modalAddBackdrop">
+    <div class="modal">
+      <div class="section-head">
+        <div>
+          <h3>Produkt erfassen</h3>
+          <p>Direkte Erfassung für den Alltag.</p>
+        </div>
+        <button class="btn btn-soft" data-close="add">Schliessen</button>
+      </div>
+      <div class="grid">
+        <input id="itemName" class="field" placeholder="Produktname" />
+        <div class="split">
+          <input id="itemQuantity" class="field" placeholder="Menge, z. B. 2x" />
+          <select id="itemLocation" class="field">
+            <option>Kühlschrank</option>
+            <option>Tiefkühler</option>
+            <option>Vorrat</option>
+          </select>
+        </div>
+        <div class="split">
+          <input id="itemCategory" class="field" placeholder="Kategorie, z. B. Milchprodukte" />
+          <input id="itemExpiry" class="field" type="date" />
+        </div>
+        <textarea id="itemNotes" class="field" placeholder="Notizen, z. B. laktosefrei oder geöffnet"></textarea>
+        <div id="manualPhotoWrap" class="hidden">
+          <div class="subtle">Gespeichertes Bild</div>
+          <img id="manualPhotoPreview" class="preview-img" alt="Produktfoto" />
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="saveItemBtn">Speichern</button>
+          <button class="btn btn-secondary" data-open="camera">Bild aufnehmen</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  function setFilter(next) { filter = next; renderInventory(); }
+  <div class="modal-backdrop" id="modalScannerBackdrop">
+    <div class="modal">
+      <div class="section-head">
+        <div>
+          <h3>QR / Barcode scannen</h3>
+          <p>Scanne Verpackungen mit der echten Kamera.</p>
+        </div>
+        <button class="btn btn-soft" data-close="scanner">Schliessen</button>
+      </div>
+      <video id="scannerVideo" playsinline autoplay muted></video>
+      <div class="camera-grid">
+        <div class="subtle" id="scanResultText">Noch kein Code erkannt.</div>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="startScannerBtn">Scanner starten</button>
+          <button class="btn btn-soft" id="stopScannerBtn">Scanner stoppen</button>
+        </div>
+        <div class="small muted">Hinweis: Funktioniert zuverlässig in aktuellen Chromium-Browsern auf Geräten mit Kamera. Wenn BarcodeDetector nicht verfügbar ist, nutze die Kameraaufnahme oder manuelle Erfassung.</div>
+      </div>
+    </div>
+  </div>
 
-  function addItem() {
-    const name     = document.getElementById('newName')?.value.trim();
-    const qty      = document.getElementById('newQty')?.value.trim() || '1 Stück';
-    const category = document.getElementById('newCategory')?.value || 'Kühlschrank';
-    const expiry   = Number(document.getElementById('newExpiry')?.value);
-    if (!name || Number.isNaN(expiry)) { alert('Bitte Produktname und Tage bis Ablauf erfassen.'); return; }
-    items.unshift({ id: Date.now(), name, qty, category, expiresIn: expiry, icon: guessIcon(name) });
-    store.saveItems(items);
-    renderAll();
-    switchTab('inventory');
-  }
+  <div class="modal-backdrop" id="modalCameraBackdrop">
+    <div class="modal">
+      <div class="section-head">
+        <div>
+          <h3>Kamera</h3>
+          <p>Mache ein Foto und übernimm es direkt ins Produkt.</p>
+        </div>
+        <button class="btn btn-soft" data-close="camera">Schliessen</button>
+      </div>
+      <video id="cameraVideo" playsinline autoplay muted></video>
+      <canvas id="cameraCanvas" class="hidden"></canvas>
+      <div class="camera-grid">
+        <div id="cameraState" class="subtle">Kamera noch nicht gestartet.</div>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="startCameraBtn">Kamera starten</button>
+          <button class="btn btn-secondary" id="capturePhotoBtn">Foto aufnehmen</button>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-soft" id="usePhotoBtn">Foto übernehmen</button>
+          <button class="btn btn-soft" id="retakePhotoBtn">Neu aufnehmen</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  function simulateCapture(mode) {
-    const samples = mode === 'scan'
-      ? { name: 'Mozzarella', qty: '2 Kugeln', category: 'Kühlschrank', expiresIn: 5 }
-      : { name: 'Gurke',      qty: '1 Stück',  category: 'Gemüse',      expiresIn: 3 };
-    items.unshift({ id: Date.now(), ...samples, icon: guessIcon(samples.name) });
-    store.saveItems(items);
-    renderAll();
-    switchTab('inventory');
-    alert((mode === 'scan' ? 'Barcode-Scan' : 'Foto-Erkennung') + ' simuliert: ' + samples.name + ' wurde übernommen.');
-  }
+  <div class="toast" id="toast"></div>
 
-  function checkDuplicate() {
-    const value  = document.getElementById('checkDuplicate')?.value.trim().toLowerCase() || '';
-    const result = document.getElementById('duplicateResult');
-    if (!value) { result.textContent = 'Die App prüft, ob ein Produkt bereits im Haushalt vorhanden ist.'; return; }
-    const match = items.find(i => i.name.toLowerCase().includes(value));
-    result.innerHTML = match
-      ? `<strong>${match.name}</strong> ist bereits vorhanden (${match.qty}, Ablauf in ${match.expiresIn === 0 ? 'weniger als 1 Tag' : match.expiresIn + ' Tagen'}).`
-      : 'Kein passender Bestand gefunden. Das Produkt kann eingekauft werden.';
-  }
+  <script>
+    const STORAGE_KEY = 'freshtrack-live-v2';
+    const DEFAULT_DATA = {
+      inventory: [
+        { id: cryptoRandom(), name: 'Milch', quantity: '1 Liter', category: 'Milchprodukte', location: 'Kühlschrank', expiry: daysFromNow(3), notes: '', addedAt: Date.now() - 86400000, photo: '' },
+        { id: cryptoRandom(), name: 'Mozzarella', quantity: '2 Packungen', category: 'Milchprodukte', location: 'Kühlschrank', expiry: daysFromNow(1), notes: 'Für Pasta', addedAt: Date.now() - 40000000, photo: '' },
+        { id: cryptoRandom(), name: 'Brokkoli', quantity: '1 Stück', category: 'Gemüse', location: 'Kühlschrank', expiry: daysFromNow(2), notes: '', addedAt: Date.now() - 120000000, photo: '' },
+        { id: cryptoRandom(), name: 'Pizzateig', quantity: '1 Rolle', category: 'Frischware', location: 'Kühlschrank', expiry: daysFromNow(-1), notes: '', addedAt: Date.now() - 80000000, photo: '' },
+        { id: cryptoRandom(), name: 'Erbsen', quantity: '1 Beutel', category: 'Gemüse', location: 'Tiefkühler', expiry: daysFromNow(60), notes: '', addedAt: Date.now() - 220000000, photo: '' }
+      ],
+      shopping: [
+        { id: cryptoRandom(), name: 'Eier', checked: false, addedAt: Date.now() - 600000 },
+        { id: cryptoRandom(), name: 'Milch', checked: false, addedAt: Date.now() - 500000 }
+      ]
+    };
 
-  function addShopping() {
-    const input = document.getElementById('shoppingInput');
-    const text  = input?.value.trim();
-    if (!text) return;
-    shopping.unshift({ id: Date.now(), text, done: false });
-    store.saveShopping(shopping);
-    renderShopping();
-    input.value = '';
-  }
+    let state = loadState();
+    let currentView = 'home';
+    let inventoryFilter = 'Alle';
+    let pendingPhoto = '';
+    let scannerStream = null;
+    let scannerLoop = null;
+    let scannerActive = false;
+    let cameraStream = null;
+    let capturedPhoto = '';
 
-  function toggleShopping(id) {
-    shopping = shopping.map(e => e.id === id ? { ...e, done: !e.done } : e);
-    store.saveShopping(shopping);
-    renderShopping();
-  }
+    const barcodeNameMap = {
+      '7613035974683': 'Kaffee',
+      '7610200337489': 'Milch',
+      '7617400045008': 'Mozzarella',
+      '7610848491001': 'Joghurt',
+      'QR-DEMO-MILCH': 'Milch',
+      'QR-DEMO-BUTTER': 'Butter'
+    };
 
-  function resetDemo() {
-    items    = structuredClone(defaultItems);
-    shopping = structuredClone(defaultShopping);
-    store.saveItems(items);
-    store.saveShopping(shopping);
-    filter = 'all';
-    renderAll();
-  }
+    const views = [...document.querySelectorAll('.view')];
+    const navButtons = [...document.querySelectorAll('.nav-btn')];
+    const toastEl = document.getElementById('toast');
 
-  // ── Clock ────────────────────────────────────────────────────
-  function updateClock() {
-    const now = new Date();
-    document.getElementById('clock').textContent =
-      String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-  }
+    function cryptoRandom() {
+      if (window.crypto?.randomUUID) return crypto.randomUUID();
+      return 'id-' + Math.random().toString(36).slice(2) + Date.now();
+    }
 
-  // ── Tab button listeners ─────────────────────────────────────
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-  });
+    function daysFromNow(days) {
+      const date = new Date();
+      date.setHours(0,0,0,0);
+      date.setDate(date.getDate() + days);
+      return date.toISOString().slice(0,10);
+    }
 
-  // ── Globals for inline onclick handlers ──────────────────────
-  window.switchTab       = switchTab;
-  window.setFilter       = setFilter;
-  window.addItem         = addItem;
-  window.addShopping     = addShopping;
-  window.toggleShopping  = toggleShopping;
-  window.resetDemo       = resetDemo;
-  window.simulateCapture = simulateCapture;
-  window.checkDuplicate  = checkDuplicate;
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(DEFAULT_DATA);
+        return JSON.parse(raw);
+      } catch {
+        return structuredClone(DEFAULT_DATA);
+      }
+    }
 
-  // ── Init ─────────────────────────────────────────────────────
-  updateClock();
-  setInterval(updateClock, 30000);
-  renderAll();
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
 
-  // ── Service Worker registration ──────────────────────────────
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(err => {
-        console.warn('SW registration failed:', err);
+    function showToast(text) {
+      toastEl.textContent = text;
+      toastEl.classList.add('show');
+      clearTimeout(showToast.t);
+      showToast.t = setTimeout(() => toastEl.classList.remove('show'), 2200);
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return 'Kein Datum';
+      const d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function expiryInfo(item) {
+      if (!item.expiry) return { label: 'Kein Datum', cls: 'info', days: 9999 };
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const expiry = new Date(item.expiry + 'T12:00:00');
+      const diff = Math.round((expiry - today) / 86400000);
+      if (diff < 0) return { label: `Abgelaufen seit ${Math.abs(diff)} Tag${Math.abs(diff) === 1 ? '' : 'en'}`, cls: 'danger', days: diff };
+      if (diff === 0) return { label: 'Heute fällig', cls: 'danger', days: diff };
+      if (diff <= 3) return { label: `In ${diff} Tag${diff === 1 ? '' : 'en'} fällig`, cls: 'warn', days: diff };
+      return { label: `Haltbar bis ${formatDate(item.expiry)}`, cls: 'ok', days: diff };
+    }
+
+    function updateTime() {
+      document.getElementById('statusTime').textContent = new Date().toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function switchView(viewName) {
+      currentView = viewName;
+      views.forEach(v => v.classList.toggle('active', v.id === `view-${viewName}`));
+      navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.view === viewName));
+      render();
+    }
+
+    function render() {
+      saveState();
+      renderHome();
+      renderInventory();
+      renderShopping();
+      renderRecent();
+    }
+
+    function renderHome() {
+      const total = state.inventory.length;
+      const soon = state.inventory.filter(item => expiryInfo(item).days <= 3).length;
+      const shopping = state.shopping.filter(item => !item.checked).length;
+      document.getElementById('statInventory').textContent = total;
+      document.getElementById('statSoon').textContent = Math.max(soon, 0);
+      document.getElementById('statShopping').textContent = shopping;
+      const summary = soon > 0
+        ? `${soon} Produkte sollten bald verbraucht werden.`
+        : 'Aktuell gibt es keine kritischen Ablaufdaten.';
+      document.getElementById('homeSummary').textContent = summary;
+
+      const soonList = document.getElementById('soonList');
+      const sorted = [...state.inventory].sort((a,b) => expiryInfo(a).days - expiryInfo(b).days).slice(0,4);
+      if (!sorted.length) {
+        soonList.innerHTML = `<div class="empty">Noch keine Produkte im Bestand.</div>`;
+        return;
+      }
+      soonList.innerHTML = sorted.map(item => inventoryCard(item, true)).join('');
+      bindInventoryActions();
+    }
+
+    function renderInventory() {
+      const categories = ['Alle', ...new Set(state.inventory.map(i => i.category).filter(Boolean))];
+      const filterWrap = document.getElementById('inventoryFilters');
+      filterWrap.innerHTML = categories.map(cat => `<button class="pill ${inventoryFilter === cat ? 'active' : ''}" data-filter="${escapeHtml(cat)}">${escapeHtml(cat)}</button>`).join('');
+      [...filterWrap.querySelectorAll('[data-filter]')].forEach(btn => btn.onclick = () => { inventoryFilter = btn.dataset.filter; renderInventory(); });
+
+      const q = document.getElementById('inventorySearch').value.trim().toLowerCase();
+      let items = [...state.inventory].sort((a,b) => expiryInfo(a).days - expiryInfo(b).days);
+      if (inventoryFilter !== 'Alle') items = items.filter(i => i.category === inventoryFilter);
+      if (q) items = items.filter(i => [i.name, i.category, i.location, i.quantity, i.notes].join(' ').toLowerCase().includes(q));
+      const list = document.getElementById('inventoryList');
+      list.innerHTML = items.length ? items.map(item => inventoryCard(item, false)).join('') : `<div class="empty">Keine Produkte gefunden.</div>`;
+      bindInventoryActions();
+    }
+
+    function renderShopping() {
+      const list = document.getElementById('shoppingList');
+      const active = [...state.shopping].sort((a,b) => Number(a.checked) - Number(b.checked) || b.addedAt - a.addedAt);
+      list.innerHTML = active.length ? active.map(item => {
+        const duplicate = findDuplicate(item.name);
+        return `
+          <div class="item-card">
+            <div class="item-top">
+              <div>
+                <h4 class="item-name">${escapeHtml(item.name)}</h4>
+                <div class="item-meta">${item.checked ? 'Bereits gekauft' : 'Offen'}</div>
+              </div>
+              <div class="badges">
+                ${duplicate ? `<span class="badge warn">Schon vorhanden</span>` : `<span class="badge ok">Nicht im Bestand</span>`}
+              </div>
+            </div>
+            ${duplicate ? `<div class="subtle">Im Bestand: ${escapeHtml(duplicate.name)} · ${escapeHtml(duplicate.quantity || 'ohne Mengenangabe')} · ${escapeHtml(duplicate.location)}</div>` : ''}
+            <div class="btn-row">
+              <button class="btn ${item.checked ? 'btn-soft' : 'btn-primary'}" data-toggle-shopping="${item.id}">${item.checked ? 'Als offen markieren' : 'Als gekauft markieren'}</button>
+              <button class="btn btn-danger" data-delete-shopping="${item.id}">Entfernen</button>
+            </div>
+          </div>`;
+      }).join('') : `<div class="empty">Die Einkaufsliste ist leer.</div>`;
+
+      const duplicates = state.shopping.filter(i => !i.checked).map(i => ({ shopping: i, duplicate: findDuplicate(i.name) })).filter(x => x.duplicate);
+      document.getElementById('duplicateInsights').innerHTML = duplicates.length
+        ? duplicates.map(x => `<div class="item-card"><div class="item-top"><div><h4 class="item-name">${escapeHtml(x.shopping.name)}</h4><div class="item-meta">Schon im Haushalt vorhanden</div></div><span class="badge warn">Prüfen</span></div><div class="subtle">Vorhanden als ${escapeHtml(x.duplicate.name)} · ${escapeHtml(x.duplicate.quantity || 'ohne Mengenangabe')} · Ablauf ${formatDate(x.duplicate.expiry)}</div></div>`).join('')
+        : `<div class="empty">Aktuell kein erkennbarer Doppelkauf.</div>`;
+
+      document.querySelectorAll('[data-toggle-shopping]').forEach(btn => btn.onclick = () => {
+        const item = state.shopping.find(i => i.id === btn.dataset.toggleShopping);
+        if (!item) return;
+        item.checked = !item.checked;
+        render();
+      });
+      document.querySelectorAll('[data-delete-shopping]').forEach(btn => btn.onclick = () => {
+        state.shopping = state.shopping.filter(i => i.id !== btn.dataset.deleteShopping);
+        render();
+      });
+    }
+
+    function renderRecent() {
+      const recent = [...state.inventory].sort((a,b) => b.addedAt - a.addedAt).slice(0,5);
+      document.getElementById('recentList').innerHTML = recent.length
+        ? recent.map(item => inventoryCard(item, false, true)).join('')
+        : `<div class="empty">Noch keine Erfassungen gespeichert.</div>`;
+      bindInventoryActions();
+    }
+
+    function inventoryCard(item, compact = false, recent = false) {
+      const info = expiryInfo(item);
+      return `
+        <div class="item-card">
+          <div class="item-top">
+            <div style="display:flex; gap:12px; align-items:flex-start;">
+              ${item.photo ? `<img class="preview-img" src="${item.photo}" alt="${escapeHtml(item.name)}" />` : ''}
+              <div>
+                <h4 class="item-name">${escapeHtml(item.name)}</h4>
+                <div class="item-meta">${escapeHtml(item.quantity || 'ohne Mengenangabe')} · ${escapeHtml(item.category || 'ohne Kategorie')} · ${escapeHtml(item.location || '')}</div>
+                ${item.notes && !compact ? `<div class="item-meta">${escapeHtml(item.notes)}</div>` : ''}
+              </div>
+            </div>
+            <span class="badge ${info.cls}">${escapeHtml(info.label)}</span>
+          </div>
+          ${recent ? `<div class="small muted">Erfasst ${new Date(item.addedAt).toLocaleString('de-CH')}</div>` : ''}
+          <div class="btn-row">
+            <button class="btn btn-secondary" data-rebuy="${item.name}">Zu Einkäufen</button>
+            <button class="btn btn-danger" data-delete-item="${item.id}">Löschen</button>
+          </div>
+        </div>`;
+    }
+
+    function bindInventoryActions() {
+      document.querySelectorAll('[data-delete-item]').forEach(btn => btn.onclick = () => {
+        state.inventory = state.inventory.filter(item => item.id !== btn.dataset.deleteItem);
+        render();
+        showToast('Produkt gelöscht.');
+      });
+      document.querySelectorAll('[data-rebuy]').forEach(btn => btn.onclick = () => {
+        addShoppingItem(btn.dataset.rebuy);
+      });
+    }
+
+    function addShoppingItem(name) {
+      const clean = name.trim();
+      if (!clean) return;
+      state.shopping.unshift({ id: cryptoRandom(), name: clean, checked: false, addedAt: Date.now() });
+      render();
+      showToast('Zur Einkaufsliste hinzugefügt.');
+      switchView('shopping');
+    }
+
+    function addInventoryItem(payload) {
+      if (!payload.name?.trim()) {
+        showToast('Produktname fehlt.');
+        return false;
+      }
+      state.inventory.unshift({
+        id: cryptoRandom(),
+        name: payload.name.trim(),
+        quantity: payload.quantity?.trim() || '1x',
+        category: payload.category?.trim() || 'Allgemein',
+        location: payload.location || 'Kühlschrank',
+        expiry: payload.expiry || '',
+        notes: payload.notes?.trim() || '',
+        photo: payload.photo || '',
+        addedAt: Date.now()
+      });
+      render();
+      showToast('Produkt gespeichert.');
+      return true;
+    }
+
+    function findDuplicate(name) {
+      const needle = normalize(name);
+      if (!needle) return null;
+      return state.inventory.find(item => normalize(item.name).includes(needle) || needle.includes(normalize(item.name)));
+    }
+
+    function normalize(value) {
+      return (value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    const addModal = document.getElementById('modalAddBackdrop');
+    const scannerModal = document.getElementById('modalScannerBackdrop');
+    const cameraModal = document.getElementById('modalCameraBackdrop');
+
+    function openModal(name) {
+      if (name === 'add') addModal.classList.add('open');
+      if (name === 'scanner') scannerModal.classList.add('open');
+      if (name === 'camera') cameraModal.classList.add('open');
+    }
+
+    async function closeModal(name) {
+      if (name === 'add') addModal.classList.remove('open');
+      if (name === 'scanner') { scannerModal.classList.remove('open'); await stopScanner(); }
+      if (name === 'camera') { cameraModal.classList.remove('open'); await stopCamera(); }
+    }
+
+    document.querySelectorAll('[data-open]').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.open)));
+    document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
+    document.querySelectorAll('[data-view]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
+
+    document.getElementById('inventorySearch').addEventListener('input', renderInventory);
+    document.getElementById('addShoppingBtn').addEventListener('click', () => {
+      const input = document.getElementById('shoppingName');
+      addShoppingItem(input.value);
+      input.value = '';
+    });
+    document.getElementById('shoppingName').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('addShoppingBtn').click();
+    });
+
+    document.getElementById('saveItemBtn').addEventListener('click', () => {
+      const ok = addInventoryItem({
+        name: document.getElementById('itemName').value,
+        quantity: document.getElementById('itemQuantity').value,
+        category: document.getElementById('itemCategory').value,
+        location: document.getElementById('itemLocation').value,
+        expiry: document.getElementById('itemExpiry').value,
+        notes: document.getElementById('itemNotes').value,
+        photo: pendingPhoto
+      });
+      if (!ok) return;
+      clearManualForm();
+      closeModal('add');
+    });
+
+    function clearManualForm() {
+      ['itemName','itemQuantity','itemCategory','itemExpiry','itemNotes'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('itemLocation').value = 'Kühlschrank';
+      pendingPhoto = '';
+      document.getElementById('manualPhotoWrap').classList.add('hidden');
+    }
+
+    function attachPhotoToForm(dataUrl) {
+      pendingPhoto = dataUrl;
+      const preview = document.getElementById('manualPhotoPreview');
+      preview.src = dataUrl;
+      document.getElementById('manualPhotoWrap').classList.remove('hidden');
+      openModal('add');
+    }
+
+    async function startScanner() {
+      const resultText = document.getElementById('scanResultText');
+      if (!('BarcodeDetector' in window)) {
+        resultText.textContent = 'BarcodeDetector wird in diesem Browser nicht unterstützt.';
+        showToast('Scanner vom Browser nicht unterstützt.');
+        return;
+      }
+      try {
+        const formats = await BarcodeDetector.getSupportedFormats();
+        const desired = ['qr_code', 'ean_13', 'ean_8', 'code_128'];
+        const supported = desired.filter(f => formats.includes(f));
+        if (!supported.length) {
+          resultText.textContent = 'Keine passenden Barcode-Formate unterstützt.';
+          return;
+        }
+        const detector = new BarcodeDetector({ formats: supported });
+        scannerStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+        const video = document.getElementById('scannerVideo');
+        video.srcObject = scannerStream;
+        await video.play();
+        scannerActive = true;
+        resultText.textContent = 'Scanner läuft. Kamera auf QR- oder Barcode richten.';
+
+        const scanFrame = async () => {
+          if (!scannerActive) return;
+          try {
+            const barcodes = await detector.detect(video);
+            if (barcodes.length) {
+              const raw = barcodes[0].rawValue;
+              const mapped = barcodeNameMap[raw] || `Code ${raw}`;
+              resultText.textContent = `Erkannt: ${raw}`;
+              await stopScanner();
+              document.getElementById('itemName').value = mapped;
+              document.getElementById('itemCategory').value = barcodeNameMap[raw] ? 'Scan erkannt' : 'Scan manuell prüfen';
+              document.getElementById('itemNotes').value = `Erfasst über Scan: ${raw}`;
+              openModal('add');
+              showToast('Code erkannt. Produktdaten prüfen und speichern.');
+              return;
+            }
+          } catch (err) {
+            resultText.textContent = 'Scannerfehler: ' + err.message;
+          }
+          scannerLoop = requestAnimationFrame(scanFrame);
+        };
+        scannerLoop = requestAnimationFrame(scanFrame);
+      } catch (err) {
+        resultText.textContent = 'Kamerazugriff fehlgeschlagen: ' + err.message;
+        showToast('Kamerazugriff nicht möglich.');
+      }
+    }
+
+    async function stopScanner() {
+      scannerActive = false;
+      if (scannerLoop) cancelAnimationFrame(scannerLoop);
+      scannerLoop = null;
+      const video = document.getElementById('scannerVideo');
+      if (scannerStream) {
+        scannerStream.getTracks().forEach(track => track.stop());
+        scannerStream = null;
+      }
+      video.srcObject = null;
+    }
+
+    async function startCamera() {
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+        const video = document.getElementById('cameraVideo');
+        video.srcObject = cameraStream;
+        await video.play();
+        capturedPhoto = '';
+        document.getElementById('cameraCanvas').classList.add('hidden');
+        document.getElementById('cameraVideo').classList.remove('hidden');
+        document.getElementById('cameraState').textContent = 'Kamera aktiv. Jetzt Foto aufnehmen.';
+      } catch (err) {
+        document.getElementById('cameraState').textContent = 'Kamera konnte nicht gestartet werden: ' + err.message;
+        showToast('Kamera konnte nicht geöffnet werden.');
+      }
+    }
+
+    async function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+      document.getElementById('cameraVideo').srcObject = null;
+    }
+
+    function capturePhoto() {
+      const video = document.getElementById('cameraVideo');
+      if (!video.videoWidth) {
+        showToast('Kamera ist noch nicht bereit.');
+        return;
+      }
+      const canvas = document.getElementById('cameraCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      capturedPhoto = canvas.toDataURL('image/jpeg', 0.92);
+      canvas.classList.remove('hidden');
+      video.classList.add('hidden');
+      document.getElementById('cameraState').textContent = 'Foto aufgenommen. Übernehmen oder neu aufnehmen.';
+    }
+
+    function retakePhoto() {
+      capturedPhoto = '';
+      document.getElementById('cameraCanvas').classList.add('hidden');
+      document.getElementById('cameraVideo').classList.remove('hidden');
+      document.getElementById('cameraState').textContent = 'Kamera aktiv. Jetzt neues Foto aufnehmen.';
+    }
+
+    function usePhoto() {
+      if (!capturedPhoto) {
+        showToast('Noch kein Foto aufgenommen.');
+        return;
+      }
+      attachPhotoToForm(capturedPhoto);
+      closeModal('camera');
+      showToast('Foto ins Produkt übernommen.');
+    }
+
+    document.getElementById('startScannerBtn').addEventListener('click', startScanner);
+    document.getElementById('stopScannerBtn').addEventListener('click', stopScanner);
+    document.getElementById('startCameraBtn').addEventListener('click', startCamera);
+    document.getElementById('capturePhotoBtn').addEventListener('click', capturePhoto);
+    document.getElementById('retakePhotoBtn').addEventListener('click', retakePhoto);
+    document.getElementById('usePhotoBtn').addEventListener('click', usePhoto);
+    document.getElementById('installDemoData').addEventListener('click', () => {
+      state = structuredClone(DEFAULT_DATA);
+      render();
+      showToast('Demo-Daten geladen.');
+    });
+
+    [addModal, scannerModal, cameraModal].forEach(modal => {
+      modal.addEventListener('click', e => {
+        if (e.target === modal) {
+          if (modal === addModal) closeModal('add');
+          if (modal === scannerModal) closeModal('scanner');
+          if (modal === cameraModal) closeModal('camera');
+        }
       });
     });
-  }
 
-  // ── Android install prompt ───────────────────────────────────
-  let deferredPrompt;
-  const banner     = document.getElementById('install-banner');
-  const installBtn = document.getElementById('install-btn');
-  const dismissBtn = document.getElementById('install-dismiss');
-
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    deferredPrompt = e;
-    banner.classList.remove('hidden');
-  });
-
-  installBtn.addEventListener('click', async () => {
-    banner.classList.add('hidden');
-    if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
-  });
-
-  dismissBtn.addEventListener('click', () => banner.classList.add('hidden'));
-</script>
+    updateTime();
+    setInterval(updateTime, 15000);
+    render();
+  </script>
 </body>
 </html>
