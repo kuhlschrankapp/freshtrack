@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>FreshTrack</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="FreshTrack" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+
+  <!-- Theme color (browser chrome on Android) -->
+  <meta name="theme-color" content="#2c7cf6" />
+
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --text: #142033;
+      --muted: #61708a;
+      --line: #d9e1ee;
+      --primary: #2c7cf6;
+      --primary-2: #1f5fc0;
+      --danger: #e04f5f;
+      --warn: #f1a93b;
+      --ok: #29a56c;
+      --shadow: 0 12px 30px rgba(16, 31, 60, 0.12);
+      --radius: 22px;
+      /* Safe area insets for notch/home-bar on iPhone */
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ── Full-screen app shell ── */
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh; /* dynamic viewport height: accounts for browser bar on iOS */
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--bg);
+      position: relative;
+    }
+
+    /* ── App bar ── */
+    .appbar {
+      padding-top: calc(var(--safe-top) + 16px);
+      padding-bottom: 16px;
+      padding-left: 20px;
+      padding-right: 20px;
+      background: linear-gradient(135deg, #2c7cf6 0%, #45a2ff 100%);
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      opacity: 0.95;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .brand h1 {
+      font-size: 24px;
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .brand p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      opacity: 0.95;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 15px;
+      border: 1px solid rgba(255,255,255,0.24);
+      flex-shrink: 0;
+    }
+
+    /* ── Stats row ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: -24px;
+      position: relative;
+      z-index: 2;
+      padding: 0 16px;
+      flex-shrink: 0;
+    }
+
+    .stat {
+      background: rgba(255,255,255,0.97);
+      border-radius: 18px;
+      padding: 14px 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat .label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat .value {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    /* ── Scrollable content ── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 14px 16px calc(var(--safe-bottom) + 90px);
+    }
+
+    /* ── Bottom nav ── */
+    .bottom-nav {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: calc(var(--safe-bottom) + 10px);
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 22px;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(18, 32, 64, 0.14);
+      border: 1px solid rgba(218, 226, 242, 0.9);
+      z-index: 100;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 0;
+      border-radius: 16px;
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: center;
+      justify-content: center;
+      font: inherit;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-btn.active {
+      background: #eef4ff;
+      color: var(--primary-2);
+    }
+
+    .tab-btn .emoji { font-size: 18px; }
+
+    /* ── Panels ── */
+    .panel { display: none; animation: fade 0.18s ease; }
+    .panel.active { display: block; }
+
+    @keyframes fade {
+      from { opacity: 0.3; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Cards / shared components ── */
+    .grid { display: grid; gap: 14px; }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .section-title button,
+    .ghost-btn,
+    .action-btn,
+    .chip,
+    .primary-btn,
+    .secondary-btn {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ghost-btn {
+      background: #eef4ff;
+      color: var(--primary-2);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .item:last-child { border-bottom: 0; padding-bottom: 0; }
+    .item:first-child { padding-top: 0; }
+
+    .item-main {
+      display: flex;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: #eef4ff;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+
+    .meta { font-size: 12px; color: var(--muted); line-height: 1.35; }
+
+    .status {
+      align-self: center;
+      white-space: nowrap;
+      font-size: 11px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-weight: 800;
+    }
+
+    .danger { background: #ffe3e7; color: #ae243b; }
+    .warn   { background: #fff1d8; color: #9c6500; }
+    .ok     { background: #dff6ea; color: #18794a; }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: #f5f8ff;
+      border-radius: 18px;
+      padding: 14px 10px;
+      text-align: center;
+      color: var(--text);
+      box-shadow: inset 0 0 0 1px #e4ecfa;
+    }
+
+    .action-btn span { display: block; font-size: 22px; margin-bottom: 6px; }
+    .action-btn strong { display: block; font-size: 12px; line-height: 1.3; }
+
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+
+    .chip {
+      background: #eef4ff;
+      color: var(--primary-2);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chip.active { background: var(--primary); color: #fff; }
+
+    .shopping-row { display: flex; gap: 8px; margin-bottom: 12px; }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px 13px;
+      font: inherit;
+      color: var(--text);
+      font-size: 16px; /* prevents iOS auto-zoom on focus */
+    }
+
+    .primary-btn {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      width: 100%;
+    }
+
+    .secondary-btn {
+      background: #eef4ff;
+      color: var(--primary-2);
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      width: 100%;
+    }
+
+    .hint { font-size: 13px; color: var(--muted); margin-top: 10px; }
+    .empty { color: var(--muted); font-size: 13px; padding: 4px 0; }
+    .tiny { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    .inline {
+      display: grid;
+      grid-template-columns: 1fr 110px;
+      gap: 10px;
+    }
+
+    /* ── Install banner ── */
+    #install-banner {
+      display: none;
+      position: fixed;
+      bottom: calc(var(--safe-bottom) + 90px);
+      left: 12px;
+      right: 12px;
+      background: #142033;
+      color: white;
+      border-radius: 18px;
+      padding: 14px 16px;
+      font-size: 13px;
+      z-index: 200;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #install-banner.hidden { display: none !important; }
+
+    #install-banner .install-text { flex: 1; line-height: 1.4; }
+    #install-banner button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 8px 14px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    #install-dismiss {
+      background: transparent !important;
+      padding: 4px 8px !important;
+      color: rgba(255,255,255,0.5) !important;
+      font-size: 18px !important;
+    }
+
+    /* Desktop: show centered, max width */
+    @media (min-width: 481px) {
+      body {
+        background: linear-gradient(180deg, #edf3ff 0%, #f9fbff 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 24px;
+      }
+      .app {
+        height: min(820px, 90vh);
+        border-radius: 34px;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.22);
+        overflow: hidden;
+      }
+      .bottom-nav {
+        border-radius: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="appbar">
+    <div class="topline">
+      <span id="clock">09:41</span>
+      <span>🔒 FreshTrack</span>
+    </div>
+    <div class="brand">
+      <div>
+        <h1>FreshTrack</h1>
+        <p>Mehr Übersicht. Weniger Food Waste.</p>
+      </div>
+      <div class="avatar">FT</div>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="content">
+    <div style="height:14px"></div>
+    <section id="panel-home" class="panel active"></section>
+    <section id="panel-inventory" class="panel"></section>
+    <section id="panel-add" class="panel"></section>
+    <section id="panel-shopping" class="panel"></section>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="tab-btn active" data-tab="home"><span class="emoji">🏠</span><span>Start</span></button>
+    <button class="tab-btn" data-tab="inventory"><span class="emoji">🥦</span><span>Bestand</span></button>
+    <button class="tab-btn" data-tab="add"><span class="emoji">➕</span><span>Erfassen</span></button>
+    <button class="tab-btn" data-tab="shopping"><span class="emoji">🛒</span><span>Einkauf</span></button>
+  </nav>
+</div>
+
+<!-- Android install prompt banner -->
+<div id="install-banner" class="hidden">
+  <div class="install-text">📲 <strong>FreshTrack</strong> als App installieren</div>
+  <button id="install-btn">Installieren</button>
+  <button id="install-dismiss">✕</button>
+</div>
+
+<script>
+  // ── Data & Storage ───────────────────────────────────────────
+  const defaultItems = [
+    { id: 1, name: 'Milch',    category: 'Kühlschrank', qty: '1 Packung', expiresIn: 2, icon: '🥛' },
+    { id: 2, name: 'Joghurt',  category: 'Kühlschrank', qty: '4 Becher',  expiresIn: 1, icon: '🥣' },
+    { id: 3, name: 'Tomaten',  category: 'Gemüse',      qty: '6 Stück',   expiresIn: 4, icon: '🍅' },
+    { id: 4, name: 'Käse',     category: 'Kühlschrank', qty: '200 g',     expiresIn: 6, icon: '🧀' },
+    { id: 5, name: 'Hähnchen', category: 'Kühlschrank', qty: '400 g',     expiresIn: 0, icon: '🍗' },
+    { id: 6, name: 'Äpfel',    category: 'Obst',        qty: '5 Stück',   expiresIn: 8, icon: '🍎' }
+  ];
+
+  const defaultShopping = [
+    { id: 101, text: 'Eier',         done: false },
+    { id: 102, text: 'Vollkornbrot', done: false },
+    { id: 103, text: 'Paprika',      done: true  }
+  ];
+
+  const store = {
+    getItems()      { return JSON.parse(localStorage.getItem('freshtrack_items')    || 'null') || structuredClone(defaultItems);   },
+    saveItems(v)    { localStorage.setItem('freshtrack_items',    JSON.stringify(v)); },
+    getShopping()   { return JSON.parse(localStorage.getItem('freshtrack_shopping') || 'null') || structuredClone(defaultShopping); },
+    saveShopping(v) { localStorage.setItem('freshtrack_shopping', JSON.stringify(v)); }
+  };
+
+  let items    = store.getItems();
+  let shopping = store.getShopping();
+  let filter   = 'all';
+
+  const panels = {
+    home:      document.getElementById('panel-home'),
+    inventory: document.getElementById('panel-inventory'),
+    add:       document.getElementById('panel-add'),
+    shopping:  document.getElementById('panel-shopping')
+  };
+
+  // ── Helpers ──────────────────────────────────────────────────
+  function expiryStatus(days) {
+    if (days <= 1) return { label: days < 1 ? 'Heute' : '1 Tag', cls: 'danger' };
+    if (days <= 4) return { label: days + ' Tage', cls: 'warn' };
+    return { label: days + ' Tage', cls: 'ok' };
+  }
+
+  function guessIcon(name) {
+    const n = name.toLowerCase();
+    if (n.includes('milch'))                  return '🥛';
+    if (n.includes('käse'))                   return '🧀';
+    if (n.includes('joghurt'))                return '🥣';
+    if (n.includes('tomate'))                 return '🍅';
+    if (n.includes('apfel'))                  return '🍎';
+    if (n.includes('banane'))                 return '🍌';
+    if (n.includes('huhn') || n.includes('hähn')) return '🍗';
+    if (n.includes('ei'))                     return '🥚';
+    if (n.includes('brot'))                   return '🍞';
+    return '🥬';
+  }
+
+  function itemHtml(item) {
+    const status = expiryStatus(item.expiresIn);
+    return `
+      <div class="item">
+        <div class="item-main">
+          <div class="icon">${item.icon}</div>
+          <div>
+            <div class="name">${item.name}</div>
+            <div class="meta">${item.qty} · ${item.category}<br>Ablauf in ${item.expiresIn === 0 ? 'weniger als 1 Tag' : item.expiresIn + ' Tagen'}</div>
+          </div>
+        </div>
+        <div class="status ${status.cls}">${status.label}</div>
+      </div>`;
+  }
+
+  // ── Render functions ─────────────────────────────────────────
+  function renderStats() {
+    const critical = items.filter(i => i.expiresIn <= 1).length;
+    const soon     = items.filter(i => i.expiresIn <= 4).length;
+    document.getElementById('stats').innerHTML = [
+      { label: 'Produkte',      value: items.length },
+      { label: 'Bald kritisch', value: soon         },
+      { label: 'Heute/morgen',  value: critical     }
+    ].map(s => `<div class="stat"><div class="label">${s.label}</div><div class="value">${s.value}</div></div>`).join('');
+  }
+
+  function renderHome() {
+    const urgent      = [...items].sort((a,b) => a.expiresIn - b.expiresIn).slice(0, 4);
+    const suggestions = items.filter(i => i.expiresIn <= 2).map(i => i.name);
+    panels.home.innerHTML = `
+      <div class="grid">
+        <div class="card">
+          <div class="section-title"><h2>Heute wichtig</h2><button class="ghost-btn" onclick="switchTab('inventory')">Alles ansehen</button></div>
+          ${urgent.map(itemHtml).join('')}
+        </div>
+        <div class="card">
+          <div class="section-title"><h2>Schnellaktionen</h2></div>
+          <div class="actions">
+            <button class="action-btn" onclick="switchTab('add')"><span>➕</span><strong>Manuell erfassen</strong></button>
+            <button class="action-btn" onclick="simulateCapture('scan')"><span>📷</span><strong>Barcode-Scan</strong></button>
+            <button class="action-btn" onclick="simulateCapture('photo')"><span>🤖</span><strong>Foto-Erkennung</strong></button>
+          </div>
+          <div class="hint">Scan und Foto sind als Prototyp simuliert.</div>
+        </div>
+        <div class="card">
+          <div class="section-title"><h2>Verbrauchsempfehlung</h2></div>
+          <p style="margin:0 0 8px; font-size:14px; line-height:1.5; color:#40506a;">Zuerst verbrauchen: <strong>${suggestions.length ? suggestions.join(', ') : 'aktuell keine'}</strong>.</p>
+        </div>
+      </div>`;
+  }
+
+  function renderInventory() {
+    const filtered = items.filter(item => {
+      if (filter === 'critical') return item.expiresIn <= 1;
+      if (filter === 'soon')     return item.expiresIn <= 4;
+      return true;
+    }).sort((a,b) => a.expiresIn - b.expiresIn);
+
+    panels.inventory.innerHTML = `
+      <div class="grid">
+        <div class="card">
+          <div class="section-title"><h2>Bestand</h2><button class="ghost-btn" onclick="resetDemo()">Demo zurücksetzen</button></div>
+          <div class="chips">
+            <button class="chip ${filter === 'all'      ? 'active' : ''}" onclick="setFilter('all')">Alle</button>
+            <button class="chip ${filter === 'soon'     ? 'active' : ''}" onclick="setFilter('soon')">Bald ablaufend</button>
+            <button class="chip ${filter === 'critical' ? 'active' : ''}" onclick="setFilter('critical')">Kritisch</button>
+          </div>
+          ${filtered.length ? filtered.map(itemHtml).join('') : '<div class="empty">Keine Produkte in diesem Filter.</div>'}
+        </div>
+      </div>`;
+  }
+
+  function renderAdd() {
+    panels.add.innerHTML = `
+      <div class="grid">
+        <div class="card">
+          <div class="section-title"><h2>Lebensmittel erfassen</h2></div>
+          <div class="grid">
+            <div class="inline">
+              <input id="newName"  placeholder="Produktname" />
+              <input id="newQty"   placeholder="Menge" />
+            </div>
+            <div class="inline">
+              <select id="newCategory">
+                <option>Kühlschrank</option><option>Gemüse</option><option>Obst</option>
+                <option>Tiefkühlung</option><option>Vorrat</option>
+              </select>
+              <input id="newExpiry" type="number" min="0" max="365" placeholder="Tage" />
+            </div>
+            <button class="primary-btn"   onclick="addItem()">Produkt speichern</button>
+            <button class="secondary-btn" onclick="simulateCapture('scan')">Barcode-Scan simulieren</button>
+            <button class="secondary-btn" onclick="simulateCapture('photo')">Foto-Erkennung simulieren</button>
+          </div>
+          <div class="hint">Je weniger Aufwand, desto höher die Nutzungsrate.</div>
+        </div>
+        <div class="card">
+          <div class="section-title"><h2>Doppelkauf-Prüfung</h2></div>
+          <input id="checkDuplicate" placeholder="z. B. Milch eingeben" oninput="checkDuplicate()" />
+          <div id="duplicateResult" class="hint">Die App prüft, ob ein Produkt bereits vorhanden ist.</div>
+        </div>
+      </div>`;
+  }
+
+  function renderShopping() {
+    panels.shopping.innerHTML = `
+      <div class="grid">
+        <div class="card">
+          <div class="section-title"><h2>Einkaufsliste</h2></div>
+          <div class="shopping-row">
+            <input id="shoppingInput" placeholder="Produkt hinzufügen" />
+            <button class="primary-btn" style="width:auto;white-space:nowrap" onclick="addShopping()">Hinzu</button>
+          </div>
+          <div>
+            ${shopping.length ? shopping.map(entry => `
+              <div class="item">
+                <div class="item-main">
+                  <div class="icon">${entry.done ? '✅' : '🛒'}</div>
+                  <div>
+                    <div class="name" style="text-decoration:${entry.done ? 'line-through' : 'none'}">${entry.text}</div>
+                    <div class="meta">${entry.done ? 'Bereits erledigt' : 'Offen'}</div>
+                  </div>
+                </div>
+                <button class="ghost-btn" onclick="toggleShopping(${entry.id})">${entry.done ? 'Offen' : 'Erledigt'}</button>
+              </div>`).join('') : '<div class="empty">Noch keine Einträge vorhanden.</div>'}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderAll() {
+    renderStats();
+    renderHome();
+    renderInventory();
+    renderAdd();
+    renderShopping();
+  }
+
+  // ── Actions ──────────────────────────────────────────────────
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+    // Scroll content back to top on tab switch
+    document.querySelector('.content').scrollTop = 0;
+  }
+
+  function setFilter(next) { filter = next; renderInventory(); }
+
+  function addItem() {
+    const name     = document.getElementById('newName')?.value.trim();
+    const qty      = document.getElementById('newQty')?.value.trim() || '1 Stück';
+    const category = document.getElementById('newCategory')?.value || 'Kühlschrank';
+    const expiry   = Number(document.getElementById('newExpiry')?.value);
+    if (!name || Number.isNaN(expiry)) { alert('Bitte Produktname und Tage bis Ablauf erfassen.'); return; }
+    items.unshift({ id: Date.now(), name, qty, category, expiresIn: expiry, icon: guessIcon(name) });
+    store.saveItems(items);
+    renderAll();
+    switchTab('inventory');
+  }
+
+  function simulateCapture(mode) {
+    const samples = mode === 'scan'
+      ? { name: 'Mozzarella', qty: '2 Kugeln', category: 'Kühlschrank', expiresIn: 5 }
+      : { name: 'Gurke',      qty: '1 Stück',  category: 'Gemüse',      expiresIn: 3 };
+    items.unshift({ id: Date.now(), ...samples, icon: guessIcon(samples.name) });
+    store.saveItems(items);
+    renderAll();
+    switchTab('inventory');
+    alert((mode === 'scan' ? 'Barcode-Scan' : 'Foto-Erkennung') + ' simuliert: ' + samples.name + ' wurde übernommen.');
+  }
+
+  function checkDuplicate() {
+    const value  = document.getElementById('checkDuplicate')?.value.trim().toLowerCase() || '';
+    const result = document.getElementById('duplicateResult');
+    if (!value) { result.textContent = 'Die App prüft, ob ein Produkt bereits im Haushalt vorhanden ist.'; return; }
+    const match = items.find(i => i.name.toLowerCase().includes(value));
+    result.innerHTML = match
+      ? `<strong>${match.name}</strong> ist bereits vorhanden (${match.qty}, Ablauf in ${match.expiresIn === 0 ? 'weniger als 1 Tag' : match.expiresIn + ' Tagen'}).`
+      : 'Kein passender Bestand gefunden. Das Produkt kann eingekauft werden.';
+  }
+
+  function addShopping() {
+    const input = document.getElementById('shoppingInput');
+    const text  = input?.value.trim();
+    if (!text) return;
+    shopping.unshift({ id: Date.now(), text, done: false });
+    store.saveShopping(shopping);
+    renderShopping();
+    input.value = '';
+  }
+
+  function toggleShopping(id) {
+    shopping = shopping.map(e => e.id === id ? { ...e, done: !e.done } : e);
+    store.saveShopping(shopping);
+    renderShopping();
+  }
+
+  function resetDemo() {
+    items    = structuredClone(defaultItems);
+    shopping = structuredClone(defaultShopping);
+    store.saveItems(items);
+    store.saveShopping(shopping);
+    filter = 'all';
+    renderAll();
+  }
+
+  // ── Clock ────────────────────────────────────────────────────
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  }
+
+  // ── Tab button listeners ─────────────────────────────────────
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // ── Globals for inline onclick handlers ──────────────────────
+  window.switchTab       = switchTab;
+  window.setFilter       = setFilter;
+  window.addItem         = addItem;
+  window.addShopping     = addShopping;
+  window.toggleShopping  = toggleShopping;
+  window.resetDemo       = resetDemo;
+  window.simulateCapture = simulateCapture;
+  window.checkDuplicate  = checkDuplicate;
+
+  // ── Init ─────────────────────────────────────────────────────
+  updateClock();
+  setInterval(updateClock, 30000);
+  renderAll();
+
+  // ── Service Worker registration ──────────────────────────────
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+
+  // ── Android install prompt ───────────────────────────────────
+  let deferredPrompt;
+  const banner     = document.getElementById('install-banner');
+  const installBtn = document.getElementById('install-btn');
+  const dismissBtn = document.getElementById('install-dismiss');
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    banner.classList.remove('hidden');
+  });
+
+  installBtn.addEventListener('click', async () => {
+    banner.classList.add('hidden');
+    if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
+  });
+
+  dismissBtn.addEventListener('click', () => banner.classList.add('hidden'));
+</script>
+</body>
+</html>
